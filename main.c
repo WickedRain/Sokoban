@@ -4,20 +4,21 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 
-//Screen attributes
+/*Screen attributes*/
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 512;
 const int SCREEN_BPP = 32;
 
-//FPS Cap
+/*FPS Cap*/
 const int FPS = 144;
 bool running;
 
-//Score
+/*Score*/
 int nummoves = 0;
 
-//The surfaces that will be used
-SDL_Surface *background = NULL;
+/*The surfaces that will be used*/
+SDL_Surface *grass = NULL;
+SDL_Surface *wall = NULL;
 SDL_Surface *screen = NULL;
 SDL_Surface *icon = NULL;
 SDL_Surface *sprites = NULL;
@@ -32,26 +33,27 @@ SDL_Surface *htp2 = NULL;
 SDL_Surface *htp3 = NULL;
 SDL_Surface *htp4 = NULL;
 
-//The fonts that are going to be used
+/*The fonts that are going to be used*/
 TTF_Font *font = NULL;
 TTF_Font *fonttitle = NULL;
 TTF_Font *fonthtp = NULL;
 
-//The color of the font
+/*The color of the font*/
 SDL_Color textColor = { 255, 255, 255 };
 
+/*This function is called in the beginning to initialize all subsystems*/
 bool init()
 {
-    //Initialize all SDL subsystems
+    /*Initialize all SDL subsystems*/
     if( SDL_Init( SDL_INIT_EVERYTHING ) == -1 )
     {
         return false;
     }
 
-    //Set up the screen
+    /*Set up the screen*/
     screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE );
 
-    //If there was an error in setting up the screen
+    /*If there was an error in setting up the screen*/
     if( screen == NULL )
     {
         return false;
@@ -59,78 +61,78 @@ bool init()
 
     TTF_Init();
 
-    //Sets Window caption and Icon
+    /*Sets Window caption and Icon*/
     icon = IMG_Load("Icon.png");
     SDL_WM_SetCaption("Sokoban", "Sokoban_Icon");
     SDL_WM_SetIcon(icon, NULL);
 
-    //If everything initialized fine
+    /*If everything initialized fine*/
     return true;
 }
 
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination )
 {
-    //Make a temporary rectangle to hold the offsets
+    /*Make a temporary rectangle to hold the offsets*/
     SDL_Rect offset;
 
-    //Give the offsets to the rectangle
+    /*Give the offsets to the rectangle*/
     offset.x = x;
     offset.y = y;
-    //Blit the surface
+    /*Blit the surface*/
     SDL_BlitSurface( source, NULL, destination, &offset );
 }
 
 SDL_Surface *load_image( char* filename )
 {
-    //Temporary storage for the image that's loaded
+    /*Temporary storage for the image that's loaded*/
     SDL_Surface* loadedImage = NULL;
 
-    //The optimized image that will be used
+    /*The optimized image that will be used*/
     SDL_Surface* optimizedImage = NULL;
-    //Load the image
+    /*Load the image*/
     loadedImage = IMG_Load( filename );
-    //If nothing went wrong in loading the image
+    /*If nothing went wrong in loading the image*/
     if( loadedImage != NULL )
     {
-        //Create an optimized image
+        /*Create an optimized image*/
         optimizedImage = SDL_DisplayFormat( loadedImage );
 
-        //Free the old image
+        /*Free the old image*/
         SDL_FreeSurface( loadedImage );
     }
-    //Return the optimized image
+    /*Return the optimized image*/
     return optimizedImage;
 }
 
-//This function clips the character from a spritesheet (sprites.bmp)
+/*This function clips the character from a spritesheet (sprites.bmp)*/
 void setrects( SDL_Rect* clip)
 {
-    clip[0].x = 70; //Facing back
-    clip[0].y = 69;
+    clip[0].x = 84; /*Facing back*/
+    clip[0].y = 64;
     clip[0].w = 36;
-    clip[0].h = 59;
+    clip[0].h = 57;
 
-    clip[1].x = 29; //Facing left
-    clip[1].y = 186;
-    clip[1].w = 39;
-    clip[1].h = 58;
+    clip[1].x = 45; /*Facing left*/
+    clip[1].y = 65;
+    clip[1].w = 36;
+    clip[1].h = 57;
 
-    clip[2].x = 70; //Facing forward
-    clip[2].y = 249;
+    clip[2].x = 85; /*Facing forward*/
+    clip[2].y = 126;
     clip[2].w = 36;
     clip[2].h = 57;
 
-    clip[3].x = 29; //Facing right
-    clip[3].y = 246;
-    clip[3].w = 39;
-    clip[3].h = 56;
+    clip[3].x = 47; /*Facing right*/
+    clip[3].y = 126;
+    clip[3].w = 36;
+    clip[3].h = 57;
 
-    clip[4].x = 0; //Box
+    clip[4].x = 0; /*Box*/
     clip[4].y = 0;
-    clip[4].w = 63;
+    clip[4].w = 64;
     clip[4].h = 64;
 
-    clip[5].x = 2; //Pressure pad
+    clip[5].x = 2; /*Pressure pad*/
     clip[5].y = 66;
     clip[5].w = 30;
     clip[5].h = 30;
@@ -141,7 +143,7 @@ void menu()
     running = true;
     menupic = load_image("splashscreen.bmp");
 
-    //Load Text
+    /*Load text*/
     font = TTF_OpenFont("KGCrossingALine.ttf", 30);
     fonttitle = TTF_OpenFont("KGCrossingALine.ttf", 100);
     title = TTF_RenderUTF8_Solid( fonttitle, "SOKOBAN", textColor );
@@ -184,7 +186,7 @@ void howtoplay()
 {
     menupic = IMG_Load("howtoplay.bmp");
 
-    //Load text
+    /*Load text*/
     fonthtp = TTF_OpenFont("KGCrossingALine.ttf", 30);
     htp = TTF_RenderUTF8_Solid( font, "How to play:", textColor );
     htp1 = TTF_RenderUTF8_Solid( font, "Push the boxes onto the pressure pads,", textColor );
@@ -220,16 +222,16 @@ void howtoplay()
     }
 
 }
-
+/*This function is used for detecting collisions*/
 bool collision(SDL_Rect* collider, SDL_Rect* collidewith)
 {
-    if(collider.y >= collidewith.y + collidewith.h)
+    if((*collider).y >= (*collidewith).y + (*collidewith).h)
         return 0;
-    if(collider.x >= collidewith.x + collidewith.w)
+    if((*collider).x >= (*collidewith).x + (*collidewith).w)
         return 0;
-    if(collider.y + collidewith.h <= collidewith.y)
+    if((*collider).y + (*collider).h <= (*collidewith).y)
         return 0;
-    if(collidewith.x + collidewith.w <= collidewith.x)
+    if((*collider).x + (*collider).w <= (*collidewith).x)
         return 0;
     return 1;
 }
@@ -237,26 +239,27 @@ bool collision(SDL_Rect* collider, SDL_Rect* collidewith)
 void sokoban()
 {
     running = true;
-    background = load_image( "background.png" );
+    grass = load_image("tile.bmp");
+    wall = load_image("wall.bmp");
     Uint32 start;
     bool dir[4] = {0, 0, 0, 0};
     bool cont[4] = {0, 0, 0, 0};
-    //Rectangle
-    SDL_Rect sprite, box, pad;
-    sprite.x = 20;
-    sprite.y = 20;
-    sprite.w = 20;
-    sprite.h = 20;
-    box.x = 100;
-    box.y = 100;
+    /*Rectangles*/
+    SDL_Rect sprite, box, pad, tile, temp, walls;
+    sprite.x = 64;
+    sprite.y = 64;
+    sprite.w = 36;
+    sprite.h = 57;
+    box.x = 160;
+    box.y = 256;
     box.w = 64;
-    box.h = 63;
+    box.h = 64;
     int frame = 0;
     sprites = SDL_DisplayFormat(load_image("sprites.bmp"));
     SDL_Rect playeranim[6];
     setrects(playeranim);
     SDL_SetColorKey(sprites, SDL_SRCCOLORKEY, SDL_MapRGB(screen -> format, 0xFF, 0x46, 0xFA));
-    //Game loop
+    /*Game loop*/
     while(running)
     {
         start = SDL_GetTicks();
@@ -268,11 +271,11 @@ void sokoban()
             case SDL_QUIT:
                 running = false;
                 break;
-            // Switch statements for directional movement (WASD)       <---- Note to self: This should be put in a function, should implement soon
+            /*Switch statements for directional movement (WASD)*/
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym)
                 {
-                case SDLK_w: //Up
+                case SDLK_w: /*Up*/
                     if (cont[0] == 0 && cont[1] == 0 && cont[2] == 0 && cont[3] == 0)
                     {
                         dir[0] = 1;
@@ -282,7 +285,7 @@ void sokoban()
                         dir[3] = 0;
                     }
                     break;
-                case SDLK_a: //Left
+                case SDLK_a: /*Left*/
                     if (cont[0] == 0 && cont[1] == 0 && cont[2] == 0 && cont[3] == 0)
                     {
                         dir[1] = 1;
@@ -291,16 +294,17 @@ void sokoban()
                         dir[3] = 0;
                     }
                     break;
-                case SDLK_s: //Right
+                case SDLK_s: /*Right*/
                     if (cont[0] == 0 && cont[1] == 0 && cont[2] == 0 && cont[3] == 0)
                     {
+
                         dir[2] = 1;
                         dir[0] = 0;
                         dir[1] = 0;
                         dir[3] = 0;
                     }
                     break;
-                case SDLK_d: //Down
+                case SDLK_d: /*Down*/
                     if (cont[0] == 0 && cont[1] == 0 && cont[2] == 0 && cont[3] == 0)
                     {
                         dir[3] = 1;
@@ -333,54 +337,124 @@ void sokoban()
                 break;
             }
         }
-        //Logic && Render
-        if(dir[0] || cont[0] && !collision(&sprite, &box))
+        /*Logic && Render*/
+        if(dir[0] || cont[0])
         {
-            cont[0]=1;
-            sprite.y --;
-            if(sprite.y % 32 == 0) {
+            temp = sprite;
+            temp.y --;
+            if(!collision(&temp, &box))
+            {
+                cont[0]=1;
+                sprite.y --;
+                if(sprite.y % 64 == 0)
+                {
+                    cont[0] = 0;
+                    nummoves++;
+                }
+            }
+            else {
                 cont[0] = 0;
-                nummoves++;
+                box.y -= 64;
             }
             frame = 0;
         }
-        if(dir[1] || cont[1] && !collision(&sprite, &box))
+        if(dir[1] || cont[1])
         {
-            cont[1] = 1;
-            sprite.x --;
-            if(sprite.x % 32 == 0) {
+            temp = sprite;
+            temp.x --;
+            if(!collision(&temp, &box))
+            {
+                cont[1] = 1;
+                sprite.x --;
+                if(sprite.x % 64 == 0)
+                {
+                    cont[1] = 0;
+                    nummoves++;
+                }
+            }
+            else {
                 cont[1] = 0;
-                nummoves++;
+                box.x -= 64;
             }
             frame = 1;
         }
-        if(dir[2] || cont[2] && !collision(&sprite, &box))
+        if(dir[2] || cont[2])
         {
-            cont[2] = 1;
-            sprite.y ++;
-            if(sprite.y % 32 == 0) {
+            temp = sprite;
+            temp.y ++;
+            if(!collision(&temp, &box))
+            {
+                cont[2] = 1;
+                sprite.y ++;
+                if(sprite.y % 64 == 0)
+                {
+                    cont[2] = 0;
+                    nummoves++;
+                }
+            }
+            else {
                 cont[2] = 0;
-                nummoves++;
+                box.y += 64;
             }
             frame = 2;
         }
-        if( dir[3] || cont[3] && !collision(&sprite, &box))
+        if( dir[3] || cont[3])
         {
-            cont[3] = 1;
-            sprite.x ++;
-            if(sprite.x % 32 == 0) {
+            temp = sprite;
+            temp.x ++;
+            if(!collision(&temp, &box))
+            {
+                cont[3] = 1;
+                sprite.x ++;
+                if(sprite.x % 64 == 0)
+                {
+                    cont[3] = 0;
+                    nummoves++;
+                }
+            }
+            else {
                 cont[3] = 0;
-                nummoves++;
+                box.x += 64;
             }
             frame = 3;
         }
-        apply_surface(0, 0, background, screen);
+        /*Collision for screen*/
+        if (sprite.x < 64 || sprite.y < 64 || sprite.x > 544 || sprite.y > 448) {
+            dir[0] = 0;
+            dir[1] = 0;
+            dir[2] = 0;
+            dir[3] = 0;
+            cont[0] = 0;
+            cont[1] = 0;
+            cont[2] = 0;
+            cont[3] = 0;
+        }
+        /* Draws the grass tilemap */
+        for (int x = 0; x < SCREEN_WIDTH / 64; x++)
+        {
+            for (int y = 0; y < SCREEN_HEIGHT / 64; y++)
+            {
+                tile.x = x * 64;
+                tile.y = y * 64;
+                SDL_BlitSurface(grass, NULL, screen, &tile);
+            }
+        }
+        /*Draws walls*/
+        for (int x = 0; x < SCREEN_WIDTH / 64; x++)
+        {
+            walls.x = x * 64;
+            SDL_BlitSurface(wall, NULL, screen, &walls);
+        }
+        for (int y = 0; y < SCREEN_HEIGHT / 64; y++)
+        {
+            walls.y = y * 64;
+            SDL_BlitSurface(wall, NULL, screen, &walls);
+        }
         SDL_BlitSurface(sprites, &playeranim[4], screen, &box);
         SDL_BlitSurface(sprites, &playeranim[frame], screen, &sprite);
-
         SDL_Flip(screen);
 
-        //If program is running fast, delay, if its running slow, delay less
+        /*If program is running fast, delay, if its running slow, delay less*/
         if( 1000 / FPS > SDL_GetTicks() - start)
             SDL_Delay(1000 / FPS - (SDL_GetTicks() - start));
     }
@@ -389,7 +463,7 @@ void sokoban()
 void cleanup()
 {
     SDL_FreeSurface( sprites );
-    SDL_FreeSurface( background );
+    SDL_FreeSurface( grass );
     SDL_FreeSurface( icon );
     SDL_FreeSurface( menupic );
     SDL_FreeSurface( htppic );
