@@ -18,6 +18,7 @@ int nummoves = 0;
 
 /*The surfaces that will be used*/
 SDL_Surface *grass = NULL;
+SDL_Surface *pressurepad = NULL;
 SDL_Surface *wall = NULL;
 SDL_Surface *screen = NULL;
 SDL_Surface *icon = NULL;
@@ -245,15 +246,43 @@ void sokoban()
     bool dir[4] = {0, 0, 0, 0};
     bool cont[4] = {0, 0, 0, 0};
     /*Rectangles*/
-    SDL_Rect sprite, box, pad, tile, temp, walls;
-    sprite.x = 64;
-    sprite.y = 64;
+    SDL_Rect sprite, box, box2, box3, box4, pad, pad2, pad3, pad4, tile, temp, walls;
+    sprite.x = 320;
+    sprite.y = 320;
     sprite.w = 36;
     sprite.h = 57;
-    box.x = 160;
-    box.y = 256;
+    box.x = 128;
+    box.y = 64;
     box.w = 64;
     box.h = 64;
+    pad.x = 84;
+    pad.y = 84;
+    pad.w = 30;
+    pad.h = 30;
+    box2.x = 448;
+    box2.y = 64;
+    box2.w = 64;
+    box2.h = 64;
+    pad2.x = 524;
+    pad2.y = 84;
+    pad2.w = 30;
+    pad2.h = 30;
+    box3.x = 128;
+    box3.y = 384;
+    box3.w = 64;
+    box3.h = 64;
+    pad3.x = 84;
+    pad3.y = 398;
+    pad3.w = 30;
+    pad3.h = 30;
+    box4.x = 448;
+    box4.y = 384;
+    box4.w = 64;
+    box4.h = 64;
+    pad4.x = 524;
+    pad4.y = 398;
+    pad4.w = 30;
+    pad4.h = 30;
     int frame = 0;
     sprites = SDL_DisplayFormat(load_image("sprites.bmp"));
     SDL_Rect playeranim[6];
@@ -342,7 +371,8 @@ void sokoban()
         {
             temp = sprite;
             temp.y --;
-            if(!collision(&temp, &box))
+            /*Checks for collision between any box and the player*/
+            if(!collision(&temp, &box) && !collision(&temp, &box2) && !collision(&temp, &box3) && !collision(&temp, &box4))
             {
                 cont[0]=1;
                 sprite.y --;
@@ -352,9 +382,22 @@ void sokoban()
                     nummoves++;
                 }
             }
-            else {
+            /*Checks which box player collided with and moves that box*/
+            else if (collision(&temp, &box)){
                 cont[0] = 0;
                 box.y -= 64;
+            }
+            else if (collision(&temp, &box2)){
+                cont[0] = 0;
+                box2.y -= 64;
+            }
+            else if (collision(&temp, &box3)){
+                cont[0] = 0;
+                box3.y -= 64;
+            }
+            else if (collision(&temp, &box4)){
+                cont[0] = 0;
+                box4.y -= 64;
             }
             frame = 0;
         }
@@ -362,7 +405,8 @@ void sokoban()
         {
             temp = sprite;
             temp.x --;
-            if(!collision(&temp, &box))
+            /*Checks for collision between any box and the player*/
+            if(!collision(&temp, &box) && !collision(&temp, &box2) && !collision(&temp, &box3) && !collision(&temp, &box4))
             {
                 cont[1] = 1;
                 sprite.x --;
@@ -372,9 +416,22 @@ void sokoban()
                     nummoves++;
                 }
             }
-            else {
+            /*Checks which box player collided with and moves that box*/
+            else if (collision(&temp, &box)){
                 cont[1] = 0;
                 box.x -= 64;
+            }
+            else if (collision(&temp, &box2)){
+                cont[1] = 0;
+                box2.x -= 64;
+            }
+            else if (collision(&temp, &box3)){
+                cont[1] = 0;
+                box3.x -= 64;
+            }
+            else if (collision(&temp, &box4)){
+                cont[1] = 0;
+                box4.x -= 64;
             }
             frame = 1;
         }
@@ -382,7 +439,8 @@ void sokoban()
         {
             temp = sprite;
             temp.y ++;
-            if(!collision(&temp, &box))
+            /*Checks for collision between any box and the player*/
+            if(!collision(&temp, &box) && !collision(&temp, &box2) && !collision(&temp, &box3) && !collision(&temp, &box4))
             {
                 cont[2] = 1;
                 sprite.y ++;
@@ -392,9 +450,22 @@ void sokoban()
                     nummoves++;
                 }
             }
-            else {
+            /*Checks which box player collided with and moves that box*/
+            else if (collision(&temp, &box)){
                 cont[2] = 0;
                 box.y += 64;
+            }
+            else if (collision(&temp, &box2)){
+                cont[2] = 0;
+                box2.y += 64;
+            }
+            else if (collision(&temp, &box3)){
+                cont[2] = 0;
+                box3.y += 64;
+            }
+            else if (collision(&temp, &box4)){
+                cont[2] = 0;
+                box4.y += 64;
             }
             frame = 2;
         }
@@ -402,7 +473,8 @@ void sokoban()
         {
             temp = sprite;
             temp.x ++;
-            if(!collision(&temp, &box))
+            /*Checks for collision between any box and the player*/
+            if(!collision(&temp, &box) && !collision(&temp, &box2) && !collision(&temp, &box3) && !collision(&temp, &box4))
             {
                 cont[3] = 1;
                 sprite.x ++;
@@ -412,9 +484,22 @@ void sokoban()
                     nummoves++;
                 }
             }
-            else {
+            /*Checks which box player collided with and moves that box*/
+            else if (collision(&temp, &box)){
                 cont[3] = 0;
                 box.x += 64;
+            }
+            else if (collision(&temp, &box2)){
+                cont[3] = 0;
+                box2.x += 64;
+            }
+            else if (collision(&temp, &box3)){
+                cont[3] = 0;
+                box3.x += 64;
+            }
+            else if (collision(&temp, &box4)){
+                cont[3] = 0;
+                box4.x += 64;
             }
             frame = 3;
         }
@@ -443,14 +528,35 @@ void sokoban()
         for (int x = 0; x < SCREEN_WIDTH / 64; x++)
         {
             walls.x = x * 64;
+            walls.y = 0 * 64;
             SDL_BlitSurface(wall, NULL, screen, &walls);
         }
-        for (int y = 0; y < SCREEN_HEIGHT / 64; y++)
+        for (int x = 0; x < SCREEN_WIDTH / 64; x++)
+        {
+            walls.x = x * 64;
+            walls.y = 7 * 64;
+            SDL_BlitSurface(wall, NULL, screen, &walls);
+        }
+        for (int y = 0; y < SCREEN_WIDTH / 64; y++)
         {
             walls.y = y * 64;
+            walls.x = 0 * 64;
             SDL_BlitSurface(wall, NULL, screen, &walls);
         }
+        for (int y = 0; y < SCREEN_WIDTH / 64; y++)
+        {
+            walls.y = y * 64;
+            walls.x = 9 * 64;
+            SDL_BlitSurface(wall, NULL, screen, &walls);
+        }
+        SDL_BlitSurface(sprites, &playeranim[5], screen, &pad);
+        SDL_BlitSurface(sprites, &playeranim[5], screen, &pad2);
+        SDL_BlitSurface(sprites, &playeranim[5], screen, &pad3);
+        SDL_BlitSurface(sprites, &playeranim[5], screen, &pad4);
         SDL_BlitSurface(sprites, &playeranim[4], screen, &box);
+        SDL_BlitSurface(sprites, &playeranim[4], screen, &box2);
+        SDL_BlitSurface(sprites, &playeranim[4], screen, &box3);
+        SDL_BlitSurface(sprites, &playeranim[4], screen, &box4);
         SDL_BlitSurface(sprites, &playeranim[frame], screen, &sprite);
         SDL_Flip(screen);
 
@@ -464,6 +570,8 @@ void cleanup()
 {
     SDL_FreeSurface( sprites );
     SDL_FreeSurface( grass );
+    SDL_FreeSurface( pressurepad );
+    SDL_FreeSurface( wall );
     SDL_FreeSurface( icon );
     SDL_FreeSurface( menupic );
     SDL_FreeSurface( htppic );
